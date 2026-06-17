@@ -50,12 +50,11 @@ Narrated demos (AI voiceover) of real runs:
 - ▶ **[Full walkthrough (4:35)](https://youtu.be/4RQnVden6L8)** — one command to a signed
   `SUSPICIOUS` verdict, verifiable offline.
 
-<!-- Maintainer: paste the rest of your demo links here and I'll lay them out per-feature.
-     To get a play-in-place video on this page, drag an .mp4 into a GitHub Issue, copy the
-     https://github.com/user-attachments/assets/<id> URL it returns, and embed that as <video src>. -->
+More screen captures — investigation GIFs, the live dashboard, the multi-host fleet rollup — are in
+the project repo's README (see *Project links*).
 
-> **Maintainer TODO — drop the rest of the demo videos here** (dashboard live tail, manifest
-> tamper-detection, fleet rollup, contradiction surfacing, …).
+<!-- To add a play-in-place video here: drag an .mp4 into a GitHub Issue, copy the resulting
+     https://github.com/user-attachments/assets/<id> URL, and embed it as <video src="...">. -->
 
 ---
 
@@ -88,8 +87,9 @@ where contributors come in.
 
 ## Where you can help (open problems)
 
-> **Maintainer TODO — replace with your real priority list.** These are starters pulled from the
-> project's own docs so the page isn't empty.
+These are where help is most useful right now — each one is grounded in the project's own limitation
+docs (`false-positives.md`, `architecture.md`), not a wishlist. Want to tackle something else, or
+think a priority is off? Open an issue and say so.
 
 | Area | What's open | Skills | Difficulty |
 |---|---|---|---|
@@ -121,9 +121,6 @@ See also: [CONTRIBUTING.md](CONTRIBUTING.md) (how to engage *here*) and
 ---
 
 ## Project links
-
-> **Maintainer TODO — confirm/replace these URLs** (the dev repo is correct; point the canonical row
-> at the release repo once judging lifts).
 
 - **Dev repo (active during the freeze):** https://github.com/TimothyVang/sans-hackathon
 - **Release repo (canonical, post-judging):** https://github.com/TimothyVang/verdict-dfir
