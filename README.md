@@ -45,19 +45,34 @@ the point.
 
 ## See it in action
 
-A run, end to end (animates inline). For the full narrated version with sound:
-▶ **[4:35 walkthrough on YouTube](https://youtu.be/4RQnVden6L8)**.
+Animated captures of VERDICT in action (silent — they loop inline). For the full narrated version
+with sound: ▶ **[4:35 walkthrough on YouTube](https://youtu.be/4RQnVden6L8)**.
 
-![VERDICT investigating evidence — case_open, the typed DFIR pipeline, the verifier, and a signed SUSPICIOUS verdict](media/investigation.gif)
+**An investigation, end to end** — `case_open` → the typed DFIR pipeline → verifier → a signed `SUSPICIOUS` verdict
 
-More captures (dashboard, fleet rollup, tamper detection) are in the project repo's README — see
-*Project links*.
+![VERDICT investigating evidence end to end](media/investigation.gif)
 
-<!-- Why a GIF, not <video>: GitHub strips <video> tags that point at committed/raw repo URLs (its
+**The live dashboard** — pipeline stages landing in real time
+
+![VERDICT live dashboard](media/dashboard.gif)
+
+**Tamper-evident custody** — altering a sealed verdict fails `manifest_verify`
+
+![Manifest tamper detection](media/manifest-tamper.gif)
+
+**Committed self-correction** — a confidence-tier flip recorded in the audit chain
+
+![Committed self-correction](media/self-correction.gif)
+
+> The longer **narrated** walkthroughs (feature deep-dives, educational explainer, contributor call)
+> are multi-minute MP4s with audio — those don't embed inline on GitHub unless uploaded as a
+> release/issue asset, so the [YouTube walkthrough](https://youtu.be/4RQnVden6L8) stands in for them.
+
+<!-- Why GIFs, not <video>: GitHub strips <video> tags pointing at committed/raw repo URLs (its
      inline player only renders for upload-generated user-attachments URLs). To embed a real MP4 with
-     sound: drag the file into a GitHub Issue or a release-note editor, copy the
-     https://github.com/user-attachments/assets/<id> URL it returns, and paste THAT on its own line
-     (GitHub auto-renders a player) or as a <video src>. Markdown image of a GIF always renders. -->
+     sound: drag the file into a GitHub Issue or release-note editor, copy the resulting
+     https://github.com/user-attachments/assets/<id> URL, and paste THAT on its own line (auto-renders
+     a player) or as a <video src>. Markdown image of a GIF always renders. -->
 
 ---
 
