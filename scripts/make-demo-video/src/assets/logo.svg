@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320" role="img" aria-label="VERDICT — DFIR at machine speed.">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&amp;display=swap');
+      .wm { font-family: 'JetBrains Mono', ui-monospace, 'DejaVu Sans Mono', monospace; }
+    </style>
+  </defs>
+
+  <!-- Warm "paper" card (matches the product brand, not the old GitHub-dark palette) -->
+  <rect width="480" height="320" rx="16" fill="#0e0c10"/>
+  <rect width="480" height="320" rx="16" fill="none" stroke="#2b2620" stroke-width="1.5"/>
+
+  <!-- BrandMark: check-as-V (the check of "verified" + the V of VERDICT) -->
+  <g transform="translate(176, 36) scale(1.6)">
+    <circle cx="40" cy="40" r="38" fill="#161318" stroke="#9b59b6" stroke-width="2"/>
+    <polyline points="23,40 35,54 60,24" fill="none" stroke="#ece6da" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text class="wm" x="240" y="232" text-anchor="middle" font-size="44" font-weight="800" letter-spacing="8" fill="#ece6da">VERDICT</text>
+  <!-- Tagline -->
+  <text class="wm" x="240" y="266" text-anchor="middle" font-size="14" font-weight="400" letter-spacing="3" fill="#8c8576">DFIR at machine speed.</text>
+</svg>

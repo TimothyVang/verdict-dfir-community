@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80" role="img" aria-label="VERDICT logo mark">
+  <!-- check-as-V: the check of "verified" + the V of VERDICT (brand 2026-06-11) -->
+  <circle cx="40" cy="40" r="38" fill="#161318" stroke="#9b59b6" stroke-width="2"/>
+  <polyline points="23,40 35,54 60,24" fill="none" stroke="#ece6da" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

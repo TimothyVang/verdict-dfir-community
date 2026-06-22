@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: "Code, bugs & build issues (project repo)"
-    url: https://github.com/TimothyVang/sans-hackathon
-    about: "VERDICT's code lives here. File code bugs, build failures, and PRs in the project repo (dev during the judging freeze; release after)."
-  - name: "Report a security vulnerability (private)"
-    url: https://github.com/TimothyVang/verdict-dfir-community/security/advisories/new
-    about: "Do not open public issues for security bugs. Use private vulnerability reporting."
+  - name: Private security report
+    url: https://github.com/TimothyVang/verdict-dfir/security/advisories/new
+    about: Report vulnerabilities privately instead of opening a public issue.
+  - name: Running VERDICT docs
+    url: https://github.com/TimothyVang/verdict-dfir/blob/master/docs/using/running-verdict.md
+    about: Check install, run-mode, and output-path details before filing usage questions.

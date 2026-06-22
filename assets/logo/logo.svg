@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200" role="img" aria-label="VERDICT — DFIR at machine speed.">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&amp;display=swap');
+      .wm { font-family: 'JetBrains Mono', ui-monospace, 'DejaVu Sans Mono', monospace; }
+    </style>
+  </defs>
+
+  <!-- Warm "paper" card -->
+  <rect width="600" height="200" rx="20" fill="#0e0c10"/>
+  <rect x="0.75" y="0.75" width="598.5" height="198.5" rx="19.25" fill="none" stroke="#2b2620" stroke-width="1.5"/>
+
+  <!-- BrandMark: check-as-V (the check of "verified" + the V of VERDICT) -->
+  <g transform="translate(40, 30) scale(1.75)">
+    <circle cx="40" cy="40" r="38" fill="#161318" stroke="#9b59b6" stroke-width="2"/>
+    <polyline points="23,40 35,54 60,24" fill="none" stroke="#ece6da" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text class="wm" x="208" y="108" font-size="58" font-weight="800" letter-spacing="9" fill="#ece6da">VERDICT</text>
+  <!-- Tagline -->
+  <text class="wm" x="210" y="140" font-size="17" font-weight="400" letter-spacing="3.5" fill="#8c8576">DFIR at machine speed.</text>
+</svg>

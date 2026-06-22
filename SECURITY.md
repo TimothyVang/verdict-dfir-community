@@ -1,17 +1,21 @@
 # Security Policy
 
-**Do not report security vulnerabilities in public issues or pull requests.**
+VERDICT is a read-only DFIR analysis tool: it opens evidence read-only, drives a
+narrow typed tool surface (no `execute_shell`), and never mutates the evidence
+under examination.
 
-VERDICT reads forensic evidence and writes a cryptographically signed chain of custody, so a security
-bug can undermine the integrity guarantee. If you find one — in the tool surface, the sanitizer, the
-manifest/attestation path, or anywhere else — report it privately.
+## Reporting a vulnerability
 
-## How to report
+Please report security issues **privately** via GitHub Security Advisories
+("Report a vulnerability" on the repository's Security tab) rather than opening a
+public issue. Include reproduction steps and the affected version/commit. We aim
+to acknowledge within 7 days.
 
-Use GitHub's **private vulnerability reporting** on this repository:
-**[Security → Report a vulnerability](../../security/advisories/new)** (enabled on this repo). It
-routes the report privately to the maintainers — no public disclosure, and no email address to
-harvest.
+## Scope
 
-Please include: what you found, how to reproduce it, and the impact you think it has. We'll
-acknowledge, investigate, and coordinate a fix and disclosure timeline with you.
+In scope: the MCP tool surface, the cryptographic chain of custody
+(audit log → Merkle root → signature), the read-only evidence-handling
+guarantees, and the agent orchestration.
+
+Out of scope: the optional, post-verdict n8n automation sidecar — it runs
+outside the audit chain and never touches evidence.
