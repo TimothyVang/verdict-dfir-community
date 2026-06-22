@@ -14,6 +14,10 @@ Throughout, we try to be honest about what is **done**, what is **opt-in**, and 
 **partial** — overclaiming a fix would repeat exactly the mistake the feedback called
 out.
 
+> See the headline fix running: the [feature deep-dive (6:37)](https://youtu.be/jw6etogNzhY) shows the
+> live agent self-correct on camera, and [`fact-fidelity.md`](fact-fidelity.md) walks the entailment
+> gate rejecting a misread on purpose.
+
 ---
 
 ## What they said → what we did

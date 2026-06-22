@@ -26,7 +26,7 @@
   <a href="https://github.com/TimothyVang"><img src="https://img.shields.io/badge/GitHub-TimothyVang-181717?logo=github&logoColor=white" alt="GitHub"></a>
   <a href="https://x.com/TimothyVang"><img src="https://img.shields.io/badge/X-@TimothyVang-000000?logo=x&logoColor=white" alt="X (Twitter)"></a>
   <a href="https://www.linkedin.com/in/TimothyVang"><img src="https://img.shields.io/badge/LinkedIn-TimothyVang-0A66C2?logo=linkedin&logoColor=white" alt="LinkedIn"></a>
-  <a href="https://www.youtube.com/@TimothyVang"><img src="https://img.shields.io/badge/YouTube-@TimothyVang-FF0000?logo=youtube&logoColor=white" alt="YouTube"></a>
+  <a href="https://www.youtube.com/@ImTimothyVang"><img src="https://img.shields.io/badge/YouTube-@ImTimothyVang-FF0000?logo=youtube&logoColor=white" alt="YouTube"></a>
 </p>
 
 ---
@@ -171,16 +171,18 @@ Every capture below is a real run, not a mockup. Full gallery: [`docs/showcase/`
 
 ### Videos
 
-Short, narrated walkthroughs — built from the same Remotion pipeline (`scripts/make-demo-video/`,
-see [`CAPTURE.md`](scripts/make-demo-video/CAPTURE.md)). The mp4s are hosted, not committed.
+Short, narrated walkthroughs on YouTube ([@ImTimothyVang](https://www.youtube.com/@ImTimothyVang)),
+built from the same Remotion pipeline (`scripts/make-demo-video/`, see
+[`CAPTURE.md`](scripts/make-demo-video/CAPTURE.md)). Hosted, not committed.
 
 | Video | What it covers |
 |-------|----------------|
 | [Product showcase (4:35)](https://youtu.be/4RQnVden6L8) | The full end-to-end run, host-by-host on a 22-host enterprise |
-| [Educational explainer](https://github.com/TimothyVang/verdict-dfir/releases/download/v0.1.0/verdict-educational-explainer.mp4) | What VERDICT is — Case → Findings → Verdict, tool-cited receipts, the three verdict words |
-| [Feature deep-dives](https://github.com/TimothyVang/verdict-dfir/releases/download/v0.1.0/verdict-feature-deep-dives.mp4) | Self-correction, the live dashboard, and offline tamper/verify — real footage |
+| [Live agent & self-correction (6:37)](https://youtu.be/jw6etogNzhY) | The agent live on a real NIST disk image: it drives the typed read-only tools and self-corrects on camera when one is unavailable |
+| [Educational explainer (2:39)](https://youtu.be/m703-Ox60AI) | What VERDICT is: Case → Findings → Verdict, tool-cited receipts, the three verdict words |
+| [Feature deep-dives (2:04)](https://youtu.be/puN0s0iNwy8) | Self-correction, the live dashboard, and offline tamper/verify (real footage) |
 | [Quickstart](https://github.com/TimothyVang/verdict-dfir/releases/download/v0.1.0/verdict-quickstart.mp4) | Install and your first signed run, in two commands |
-| [**Help build VERDICT**](https://github.com/TimothyVang/verdict-dfir/releases/download/v0.1.0/verdict-contributor-call.mp4) | What it is, the non-negotiable invariants, and the contributor on-ramp |
+| [**Help build VERDICT (2:13)**](https://youtu.be/4iJs1dQCYbY) | What it is, the non-negotiable invariants, and the contributor on-ramp |
 
 > Building or re-voicing them: `bash scripts/make-demo-video.sh --all`
 > (local Piper voice by default; `TTS_ENGINE=elevenlabs` for the cloud voice).
@@ -325,6 +327,24 @@ execution trace for reviewer spot-checks lives in
 [`docs/release-evidence/`](docs/release-evidence/): Finding `f-A-evtx-audit-log-cleared` maps to
 `evtx_query` tool call `tc-002`, with verifier replay and token usage recorded.
 
+## Built from practitioner feedback
+
+When VERDICT launched we posted it to r/computerforensics, r/digitalforensics, and r/rust and asked,
+directly, *"where does this break?"* Practitioners pushed back hard. They flagged hallucination (a
+valid `tool_call_id` proves a finding *points at* real output, not that the model *read it right*),
+two same-model pools converging on a shared blind spot, and court-defensibility. We shipped against
+that feedback. The headline response is a deterministic, LLM-free
+**[fact-fidelity gate](docs/fact-fidelity.md), now on by default**: a CONFIRMED finding must declare
+the values it claims, a non-LLM check re-extracts each from the re-run tool output, and a misread is
+**rejected before it reaches the verdict**. Around it sit honest `INDETERMINATE` and coverage
+semantics, plus an audit chain that logs every rejection visibly instead of silently dropping it.
+
+This is enforced where findings declare values. It is **not "hallucination solved"**: interpretation
+has no deterministic oracle and stays human-owned. The full point-by-point (what they said, what we
+shipped, and what is still open) lives in **[docs/community-response.md](docs/community-response.md)**,
+and you can watch the live agent self-correct on camera in the
+[feature deep-dive (6:37)](https://youtu.be/jw6etogNzhY).
+
 ## Getting started
 
 A single command installs the product prerequisites and verifies the environment:
@@ -401,6 +421,7 @@ carries a real verdict and `manifest_verify.json` reports `overall: true`.
 - [docs/verdict-semantics.md](docs/verdict-semantics.md) — what `SUSPICIOUS` / `INDETERMINATE` / `NO_EVIL` mean
 - [docs/false-positives.md](docs/false-positives.md) — how VERDICT avoids over-claiming
 - [docs/fact-fidelity.md](docs/fact-fidelity.md) — the deterministic entailment check (a finding can't assert a value not in its cited evidence)
+- [docs/community-response.md](docs/community-response.md) — launch criticism (Reddit) answered point by point: what we said we'd fix, what shipped, what's still open
 - [docs/provability-standard.md](docs/provability-standard.md) — the vendor-neutral standard for a *provable* AI forensic finding
 - [docs/trust-benchmark.md](docs/trust-benchmark.md) — the "did the AI overclaim?" reproducible benchmark
 - [docs/trust-leaderboard.md](docs/trust-leaderboard.md) — the AI-DFIR trust leaderboard (VERDICT's reference run)
