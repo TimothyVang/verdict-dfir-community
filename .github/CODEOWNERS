@@ -1,3 +1,7 @@
+# Default owner — every PR requires the maintainer's review (the "code-owner" in the
+# 2-approval gate). See docs/contribution-model.md.
+* @TimothyVang
+
 # Require owner review before CI/release policy changes can alter required gates.
 .github/CODEOWNERS @TimothyVang
 .github/workflows/** @TimothyVang
