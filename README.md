@@ -352,6 +352,98 @@ execution trace for reviewer spot-checks lives in
 [`docs/release-evidence/`](docs/release-evidence/): Finding `f-A-evtx-audit-log-cleared` maps to
 `evtx_query` tool call `tc-002`, with verifier replay and token usage recorded.
 
+## Results: what's proven
+
+VERDICT is scored on two axes against published answer keys: does it surface known activity, and does
+it refuse to overclaim when coverage is thin. Every number below is committed and reproducible with
+`scripts/score-recall.py`; full method and caveats in [`docs/accuracy-report.md`](docs/accuracy-report.md).
+
+| Case | Evidence | Recall (bar) | Run verdict | What it shows |
+|---|---|---|---|---|
+| **Nitroba** | network (PCAP) | **5/5 = 100%** (80%) | `INDETERMINATE` | Full network-evidence recall with no over-attribution. All five golden facts surfaced; attribution stays `INFERRED` / `HYPOTHESIS`, so the verdict scopes down. The strongest single result. |
+| **NIST Hacking Case** | disk (Windows XP) | **7/14 = 50%** (5/14 floor; bar 71%) | `SUSPICIOUS` | 8 CONFIRMED tool-artifact findings, including Prefetch-backed tool-use evidence with corroboration details in the report; shellbag staging, LNK and Recycle-Bin traces, a suspiciously-named local account (SAM, T1136.001), OpenSaveMRU. Below the bar, up from 1/14. Seven misses (search / USB / email / browser history, XP `.evt`, thumbcache, named-pipe) **published, not hidden**. |
+| **synthetic-benign** | negative control | 0 findings | `NO_EVIL` | False-positive floor: a benign image stays `NO_EVIL`. |
+| **alihadi-09-encrypt** | disk (FP control) | `INDETERMINATE` expected | (expected) | Dual-use crypto is not proof; an overconfident `SUSPICIOUS` fails the scorer. |
+
+Of 10 scoreable goldens, **1 is fully scored and passing** (Nitroba) and **1 is scored and
+failing-but-improving** (NIST); the other 8 are fixture-staged and **not yet run, with no number
+fabricated**. NIST recall is run-dependent (5/14 floor, 7/14 best committed).
+
+### Artifact classes proven on committed runs
+
+Each is backed by a real tool call in a committed `audit.jsonl`:
+
+- **Disk**: raw/`.E01` mount + extract, `$MFT` (`mft_timeline`), registry hives (`registry_query`), Prefetch (`prefetch_parse`)
+- **Windows event logs**: `evtx_query`, plus a Hayabusa/Sigma sweep at lead-tier (`hayabusa_scan`)
+- **NTFS USN journal**: `usnjrnl_query`
+- **Network**: PCAP triage (`pcap_triage`)
+- **Memory**: Volatility 3 active list, pool scan, cross-view, injection (`vol_pslist`, `vol_psscan`, `vol_psxview`, `vol_malfind`)
+- **Custody intake**: `case_open` SHA-256 over the evidence
+
+The long-tail verbs (`vol_run`, `ez_parse`, `plaso_parse`, `mac_triage`, `cloud_audit`,
+`journalctl_query`, `login_accounting`, `ausearch`, `nfdump_query`, `suricata_eve`, `indx_parse`)
+plus `yara_scan`, `sysmon_network_query`, `zeek_summary`, `vel_collect`, and `browser_history` are
+typed and fixture-tested, **not yet exercised on real evidence in a committed run**.
+
+### Wins, with the receipt
+
+**Evil caught with full custody, zero LLM calls.** A fresh deterministic run on the public `EID 1102`
+Security-log-clear fixture, signed and offline-verifiable:
+
+<p align="center">
+  <img src="docs/showcase/results-report-eid1102.png" alt="VERDICT forensic report: a SUSPICIOUS verdict on a confirmed Security audit-log clearing (EID 1102, T1070.001) with the cryptographic attestation block (audit-log final hash and Merkle root)" width="760">
+</p>
+
+```text
+seq  1  tool_call_start   case_open    tc-001
+seq  2  tool_call_output  tc-001   output_sha256 a0615707…   (= the evidence SHA-256)
+seq  3  tool_call_start   evtx_query   tc-002
+seq  4  tool_call_output  tc-002   output_sha256 3d3dd694…
+seq 17  finding_approved  f-A-evtx-audit-log-cleared  cites tc-002  (T1070.001)
+verifier replay matched : true
+manifest_verify          : overall true · ed25519 signature_verified · merkle c7f9a8bf…
+token_usage              : llm_api_calls 0 · total_tokens 0   (deterministic headless path)
+coverage                 : parsed [custody, evtx] · not_supplied [disk, memory, network, velociraptor] · 7 ATT&CK blind spots kept visible
+```
+
+That `output_sha256 3d3dd694…` and finding ID reproduce in the committed trace
+([`docs/release-evidence/evtx-security-log-clear-trace-summary.json`](docs/release-evidence/evtx-security-log-clear-trace-summary.json)).
+Run it and compare.
+
+**Custody you can verify offline.** Every run seals into a hash-chained `audit.jsonl`, a Merkle root
+over canonical tool outputs, and an ed25519-signed manifest:
+
+<p align="center">
+  <img src="docs/showcase/results-custody-chain.png" alt="Cryptographic chain of custody: hash-chained audit.jsonl records and per-output Merkle leaves folding into the ed25519-signed run.manifest.json" width="760">
+</p>
+
+```text
+manifest_verify : overall true · audit_chain_ok · leaf_count_ok · merkle_root_ok · entailment_ok · ed25519 signature_verified
+```
+
+→ [`docs/release-evidence/sample-run/manifest_verify.json`](docs/release-evidence/sample-run/manifest_verify.json)
+
+**Self-correction under real failure (organic, not injected).**
+
+```text
+organic     : fault_injection_present false  ("the string fault_injection never appears in the audit chain")
+trigger     : registry_query failed on truncated RegBack hives (SAM / SECURITY / SOFTWARE)
+adjustment  : course_correction = "narrow (skip this key; continue remaining hive triage)"   x6
+escalation  : heartbeat_failure = "escalate" -> honest partial INDETERMINATE over what was examined   x5
+audit chain : 311 hash-chained records (excerpt seq 169-183)
+```
+
+→ [`docs/release-evidence/natural-self-correction-summary.json`](docs/release-evidence/natural-self-correction-summary.json)
+
+**Self-correction in code, first-pass.** The textbook DKOM signature (`vol_pslist`=0 vs
+`vol_psscan`=124) was refused as a rootkit: OS singletons recovered only by `psscan`, plus a duplicate
+`System` PID, point to acquisition smear, which a rootkit cannot produce. The engine re-sequenced to
+`vol_psxview` and scoped to `INDETERMINATE`, with no post-run patch
+([`docs/accuracy-report.md`](docs/accuracy-report.md)).
+
+Don't trust the model. Reproduce any row: `scripts/verdict <evidence>` then
+`scripts/score-recall.py tmp/auto-runs/<case-id> --golden goldens/<case-id>`.
+
 ## Built from practitioner feedback
 
 When VERDICT launched we posted it to r/computerforensics, r/digitalforensics, and r/rust and asked,
