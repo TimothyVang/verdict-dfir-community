@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/node-20-green.svg" alt="Node 20">
 </p>
 
-<p align="center"><b>DFIR for agents — 45 typed, read-only, audit-chained forensic MCP tools any AI agent can plug into and drive, with a verdict you can verify offline.</b></p>
+<p align="center"><b>DFIR for agents — 45 typed, read-only, audit-chained forensic MCP tools any AI agent can plug into and drive, with custody you can verify offline.</b></p>
 
 <p align="center">
   <a href="https://timothyvang.github.io/verdict-dfir/"><b>Docs</b></a> ·
@@ -31,23 +31,28 @@
 
 ---
 
-**VERDICT is DFIR for agents** — a typed, read-only, audit-chained forensic tool surface any AI agent
-can plug into and drive. Point an agent at a Windows-host investigation (memory images, EVTX logs,
-disk artifacts, network captures) and it works through **45 narrow, schema-validated, read-only MCP
-tools**, so every Finding cites the exact tool call that produced it. The result is an evidence-bound
-verdict (`SUSPICIOUS` / `INDETERMINATE` / `NO_EVIL`) backed by a cryptographic chain of custody any
-third party can verify offline.
+**VERDICT is DFIR (digital forensics & incident response) for agents** — a typed, read-only,
+audit-chained forensic tool surface any AI agent can plug into and drive. Point an agent at a
+Windows-host investigation (memory images, EVTX logs, disk artifacts, network captures) and it works
+through **45 narrow, schema-validated, read-only MCP (Model Context Protocol) tools**, so every
+Finding cites the exact tool call that produced it. The result is an evidence-bound verdict backed by
+a cryptographic chain of custody any third party can verify offline. The three verdict words are
+scoped tightly: **`SUSPICIOUS`** means reportable evidence was found, **`INDETERMINATE`** means
+coverage was too limited to scope a clearance, and **`NO_EVIL`** means no reportable finding in the
+artifacts actually examined. `NO_EVIL` is never a whole-environment clean bill of health: coverage is
+bounded, and what was not examined is not the same as absent.
 
 The two tool servers are **standard MCP** — any MCP-capable agent can connect to them. VERDICT also
 ships its **reference agent**: running `scripts/verdict <evidence>` (or `claude`) in this repo turns
 that [Claude Code](https://claude.com/claude-code) session into the analyst — it opens the Case,
 drives the tools, runs the verifier, and signs the verdict, with no separate application server. It is
-not an autonomous responder: the analyst approves the plan, and the verifier re-runs every cited tool
-before any Finding reaches the report.
+not an autonomous responder: the analyst approves the plan, and before any Finding reaches the report
+the verifier re-runs every cited tool to confirm its output reproduces. Replay reproduces the
+operation; it does not validate the interpretation.
 
 > **The tools give any agent a read-only forensic surface; the verdict, custody, and verification
 > guarantees come from VERDICT's orchestration layer** (the verifier, the ≥2-artifact-class gate, the
-> dual-pool ACH, and the signed manifest) — included here, driven by the reference agent today.
+> dual-pool ACH (Analysis of Competing Hypotheses), and the signed manifest) — included here, driven by the reference agent today.
 > "DFIR for agents" means forensic tools that agents *operate* — **not** forensics of what an agent did.
 
 <p align="center"><sub><b>Drives:</b> memory images · EVTX · disk images (<code>.E01</code>/<code>.dd</code>) · packet captures · registry · MFT · Prefetch · Velociraptor · whole multi-host case folders</sub></p>
@@ -85,6 +90,10 @@ bash scripts/setup            # toolchain + DFIR binaries + both MCP servers + p
 scripts/verdict <path-to-evidence>
 ```
 
+Before your first Case you also need a **Claude Code credential**: a logged-in `claude`,
+`CLAUDE_CODE_OAUTH_TOKEN`, or `ANTHROPIC_API_KEY`. VERDICT drives the tools as a Claude Code agent, so
+`scripts/verdict` needs one to run. `scripts/setup` will go green without it; a Case will not.
+
 Point it at supported evidence — a memory image, EVTX log, disk image (`.E01` / `.dd`), packet
 capture, Velociraptor collection, or a whole multi-host case folder. Output lands in
 `tmp/auto-runs/<case-id>/`. Unsupported formats degrade to custody/limitation records rather than a
@@ -95,7 +104,7 @@ Prefer Claude Code interactively? Run `claude` in the repo and type `/verdict <e
 
 ## Get test evidence
 
-The repo's `evidence/` directory ships empty — real forensic images are far too large to host on GitHub. Drop your own evidence into `evidence/` (or point `$FINDEVIL_EVIDENCE_ROOT` at wherever you keep it) and run `bash scripts/verdict <image>`.
+The repo's `evidence/` directory ships empty — real forensic images are far too large to host on GitHub. Drop your own evidence into `evidence/` (or point `$FINDEVIL_EVIDENCE_ROOT` at wherever you keep it) and run `scripts/verdict <image>`.
 
 Public datasets you can download to try VERDICT, mapped to the path each exercises:
 
@@ -127,6 +136,21 @@ Every run writes a self-contained case directory:
 </p>
 <p align="center"><sub>Each run seals into a hash-chained audit log, a Merkle root over canonical tool outputs, and a signed manifest — verifiable offline with <code>manifest_verify</code>.</sub></p>
 
+## Reproduce a finding
+
+Don't trust the model. Reproduce the finding. Every Finding cites a `tool_call_id`; the verifier
+re-runs that exact tool call, compares the output hash, and re-extracts the value the Finding claims,
+so a third party can replay the chain offline.
+
+Worked example, committed for spot-checks: Finding `f-A-evtx-audit-log-cleared` cites `evtx_query`
+tool call `tc-002`. Its cited output, SHA-256, verifier replay, and coverage state are in
+[`docs/release-evidence/`](docs/release-evidence/); the offline-verification recipe is in
+[`docs/cryptographic-attestation.md`](docs/cryptographic-attestation.md). After any run, confirm
+`tmp/auto-runs/<case-id>/manifest_verify.json` reports `overall: true`.
+
+A match proves the cited operation reproduces and the custody chain holds. It does not validate the
+interpretation; that stays the examiner's call.
+
 ## See it run
 
 Every capture below is a real run, not a mockup. Full gallery: [`docs/showcase/`](docs/showcase/).
@@ -149,13 +173,13 @@ Every capture below is a real run, not a mockup. Full gallery: [`docs/showcase/`
 <p align="center"><sub>One command, the typed DFIR pipeline, a signed <code>SUSPICIOUS</code> verdict with <code>manifest_verify = PASS</code>.</sub></p>
 
 <p align="center">
-  <img src="docs/showcase/dashboard-hero.png" alt="Verdict banner: SUSPICIOUS, 8 confirmed findings on SCHARDT.dd, signed and verifiable offline" width="250">
+  <img src="docs/showcase/dashboard-hero.png" alt="Verdict banner: SUSPICIOUS, 8 findings at CONFIRMED tier on SCHARDT.dd, signed and verifiable offline" width="250">
   &nbsp;
   <img src="docs/showcase/dashboard-findings.png" alt="Tool-cited findings, each citing a tool_call_id and SHA-256 with ATT&amp;CK technique tags" width="250">
   &nbsp;
   <img src="docs/showcase/report.png" alt="Signed forensic investigation report with cryptographic attestation" width="250">
 </p>
-<p align="center"><sub>The NIST SCHARDT.dd case through SIFT: <code>SUSPICIOUS</code> with 8 confirmed tool executions (cain.exe, mIRC, Ethereal, NetStumbler), each tool-cited, in a signed report.</sub></p>
+<p align="center"><sub>The NIST SCHARDT.dd case through SIFT: <code>SUSPICIOUS</code> with 8 findings at CONFIRMED tier (each verifier-passed and backed by two artifact classes): cain.exe, mIRC, Ethereal, NetStumbler, each tool-cited, in a signed report.</sub></p>
 
 <p align="center">
   <img src="docs/showcase/sift-scenario/srl-basefile-sift.gif" alt="VERDICT investigating the SRL-2018 base-file host with the forensic toolchain running inside the SANS SIFT VM" width="760">
@@ -165,9 +189,9 @@ Every capture below is a real run, not a mockup. Full gallery: [`docs/showcase/`
 <p align="center">
   <img src="docs/showcase/sift-scenario/srl-fleet-report-hero.png" alt="Fleet rollup across 22 hosts with cross-host process correlations and multi-host temporal clusters" width="380">
   &nbsp;
-  <img src="docs/showcase/sift-scenario/srl-basefile-sift-dashboard-hero.png" alt="base-file file server: SUSPICIOUS, confirmed Windows Security-log wipe, signed and verifiable offline" width="380">
+  <img src="docs/showcase/sift-scenario/srl-basefile-sift-dashboard-hero.png" alt="base-file file server: SUSPICIOUS, confirmed Windows Security-log clear, signed and verifiable offline" width="380">
 </p>
-<p align="center"><sub>Cross-host fleet rollup, and the <code>base-file</code> server flagged <code>SUSPICIOUS</code> on a confirmed Security-log wipe (EID&nbsp;1102), with PowerShell-LOLBin and service-install leads held at <code>HYPOTHESIS</code>.</sub></p>
+<p align="center"><sub>Cross-host fleet rollup, and the <code>base-file</code> server flagged <code>SUSPICIOUS</code> on a confirmed Security-log clear (EID&nbsp;1102), with PowerShell-LOLBin and service-install leads held at <code>HYPOTHESIS</code>.</sub></p>
 
 ### Videos
 
@@ -217,8 +241,8 @@ Three design choices carry the weight:
    tool outputs (computed by the Python manifest builder, mirroring `rs_merkle` semantics) → a signed
    manifest. The default signer is a local Ed25519 key that verifies offline; Sigstore/Rekor is the
    identity and transparency-log tier. `manifest_verify` checks the chain and root offline, and
-   customer-release candidates carry an expert-signoff packet. The custody model is framed for
-   FRE 902(14) self-authenticating evidence — see
+   customer-release candidates carry an expert-signoff packet. This is about integrity and offline
+   replayability, not admissibility; the courtroom framing (FRE 902(14)) and its caveats live in
    [`docs/cryptographic-attestation.md`](docs/cryptographic-attestation.md).
 3. **Analysis of Competing Hypotheses as agent topology.** Two pools investigate the same evidence
    with opposing priors. Their disagreements are emitted as first-class `kind=contradiction` records
@@ -300,7 +324,8 @@ Details: [`docs/fact-fidelity.md`](docs/fact-fidelity.md).
 - **Fleet scale.** Run a whole estate, not one box: the investigate → correlate → render pipeline
   produces a single cross-host `FLEET_REPORT` surfacing signals that only appear across machines —
   the same uncommon process on many hosts, near-simultaneous process-creation waves, MITRE-technique
-  spread. (On a 22-host SANS estate it pinned one implant image to 20 of 22 hosts.) Runs in the SANS
+  spread. (On a 22-host SANS estate it correlated the same uncommon image across 20 of 22 hosts;
+  per-host custody still required.) Runs in the SANS
   SIFT VM ([fleet analysis](docs/using/fleet-analysis.md)) or per-host locally with no VM
   ([whole-case local run](docs/using/whole-case-local-run.md)).
 - **Optional post-verdict action.** When the operator deploys an n8n workflow, a verdict can drive a
@@ -333,9 +358,8 @@ When VERDICT launched we posted it to r/computerforensics, r/digitalforensics, a
 directly, *"where does this break?"* Practitioners pushed back hard. They flagged hallucination (a
 valid `tool_call_id` proves a finding *points at* real output, not that the model *read it right*),
 two same-model pools converging on a shared blind spot, and court-defensibility. We shipped against
-that feedback. The headline response is a deterministic, LLM-free
-**[fact-fidelity gate](docs/fact-fidelity.md), now on by default**: a CONFIRMED finding must declare
-the values it claims, a non-LLM check re-extracts each from the re-run tool output, and a misread is
+that feedback. The headline response is the deterministic, LLM-free
+**[fact-fidelity gate](docs/fact-fidelity.md) described above, now on by default**: a misread is
 **rejected before it reaches the verdict**. Around it sit honest `INDETERMINATE` and coverage
 semantics, plus an audit chain that logs every rejection visibly instead of silently dropping it.
 
@@ -345,18 +369,16 @@ shipped, and what is still open) lives in **[docs/community-response.md](docs/co
 and you can watch the live agent self-correct on camera in the
 [feature deep-dive (6:37)](https://youtu.be/jw6etogNzhY).
 
-## Getting started
+## Running a Case
 
-A single command installs the product prerequisites and verifies the environment:
+You cloned and ran `bash scripts/setup` under [Install and run](#install-and-run) above. This section
+covers what that command does, its variants, the SIFT option, and how to drive a Case. Full step list:
+[QUICKSTART.md](QUICKSTART.md).
 
-```bash
-bash scripts/setup
-```
-
-It installs the toolchain (Rust, uv, Node, pnpm) and the supported local DFIR binaries it can manage
-(Volatility 3, Hayabusa, Chainsaw, Velociraptor, Sleuth Kit, tshark, pandoc — YARA is built into the
-Rust binary), builds and verifies both MCP servers, runs the preflight `doctor`, and prints an honest
-green/amber summary. Common variants:
+`bash scripts/setup` installs the toolchain (Rust, uv, Node, pnpm) and the supported local DFIR
+binaries it can manage (Volatility 3, Hayabusa, Chainsaw, Velociraptor, Sleuth Kit, tshark, pandoc —
+YARA is built into the Rust binary), builds and verifies both MCP servers, runs the preflight
+`doctor`, and prints an honest green/amber summary. Common variants:
 
 ```bash
 bash scripts/setup --run         # install, then watch evidence/ and investigate on drop
