@@ -5246,9 +5246,15 @@ def discipline_agent_findings(
         confidence = finding.get("confidence")
         if mitre.startswith(_AGENT_OVERCLAIM_MITRE_PREFIXES):
             classes: set[str] = set()
-            for cid in [finding.get("tool_call_id"), *(finding.get("derived_from") or [])]:
+            for cid in [
+                finding.get("tool_call_id"),
+                *(finding.get("derived_from") or []),
+            ]:
                 tool = tool_by_tcid.get(str(cid))
-                if tool in TOOL_ARTIFACT_CLASSES and TOOL_ARTIFACT_CLASSES[tool] != "custody":
+                if (
+                    tool in TOOL_ARTIFACT_CLASSES
+                    and TOOL_ARTIFACT_CLASSES[tool] != "custody"
+                ):
                     classes.add(TOOL_ARTIFACT_CLASSES[tool])
             if len(classes) < 2:
                 dropped.append(
@@ -5295,14 +5301,18 @@ _GATE_SAFE_SUBSTITUTIONS = {
 }
 
 _GATE_SAFE_RE = re.compile(
-    r"(?<![\w-])(" + "|".join(re.escape(k) for k in _GATE_SAFE_SUBSTITUTIONS) + r")(?![\w-])",
+    r"(?<![\w-])("
+    + "|".join(re.escape(k) for k in _GATE_SAFE_SUBSTITUTIONS)
+    + r")(?![\w-])",
     re.IGNORECASE,
 )
 
 
 def _gate_safe_text(text: str) -> str:
     """Neutralize any standalone report-QA trigger token in composed finding text."""
-    return _GATE_SAFE_RE.sub(lambda m: _GATE_SAFE_SUBSTITUTIONS[m.group(0).lower()], text)
+    return _GATE_SAFE_RE.sub(
+        lambda m: _GATE_SAFE_SUBSTITUTIONS[m.group(0).lower()], text
+    )
 
 
 def compose_agent_finding_description(finding: dict[str, Any]) -> str:
@@ -9088,7 +9098,11 @@ class Investigation:
             from findevil_agent.agentloop.integration import AgentToolBridge
             from findevil_agent.agentloop.loop import run_agent_loop
             from findevil_agent.agentloop.mcp_tools import mcp_tools_to_openai
-            from findevil_agent.agentloop.pods import POOL_A, POOL_B, RECORD_FINDING_TOOL
+            from findevil_agent.agentloop.pods import (
+                POOL_A,
+                POOL_B,
+                RECORD_FINDING_TOOL,
+            )
         except ImportError as exc:
             raise RuntimeError(
                 "agent mode (--agent) needs the Python 3.11+ findevil_agent package; this "
@@ -9127,7 +9141,9 @@ class Investigation:
             if isinstance(res, dict):
                 sha = str(res.get("_mcp_output_sha256", ""))
                 display = {
-                    k: v for k, v in res.items() if k not in ("_mcp_output_sha256", "_meta")
+                    k: v
+                    for k, v in res.items()
+                    if k not in ("_mcp_output_sha256", "_meta")
                 }
             else:
                 sha = self._hash_obj(res)
@@ -9138,7 +9154,9 @@ class Investigation:
         for pod in (POOL_A, POOL_B):
             self._heartbeat(f"agent:{pod.name}")
             bridge = AgentToolBridge(
-                case_id=case_id, pool_origin=pod.pool_origin, call_and_record=call_and_record
+                case_id=case_id,
+                pool_origin=pod.pool_origin,
+                call_and_record=call_and_record,
             )
             run_agent_loop(
                 provider,
@@ -9159,10 +9177,15 @@ class Investigation:
                 self._audit(
                     py,
                     "agent_finding_rationale",
-                    {"finding_id": finding.get("finding_id"), "agent_rationale": finding.get("description")},
+                    {
+                        "finding_id": finding.get("finding_id"),
+                        "agent_rationale": finding.get("description"),
+                    },
                 )
                 finding["description"] = compose_agent_finding_description(finding)
-            (self.findings_pool_a if pod.pool_origin == "A" else self.findings_pool_b).extend(kept)
+            (
+                self.findings_pool_a if pod.pool_origin == "A" else self.findings_pool_b
+            ).extend(kept)
 
     def _output_hash(self, obj: dict[str, Any]) -> str:
         value = obj.pop("_mcp_output_sha256", None)

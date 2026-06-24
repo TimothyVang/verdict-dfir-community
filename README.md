@@ -115,7 +115,12 @@ Public datasets you can download to try VERDICT, mapped to the path each exercis
 | **Nitroba University** (`nitroba.pcap`) | pcap → network triage | [digitalcorpora.org · Nitroba](https://digitalcorpora.org/corpora/scenarios/nitroba-university-harassment-scenario/) |
 | **NIST CFReDS** (disk, memory, mobile, more) | mixed | [cfreds.nist.gov](https://cfreds.nist.gov/) |
 | **Digital Corpora** (M57-Patents, scenarios) | disk / pcap | [digitalcorpora.org](https://digitalcorpora.org/) |
+| **Digital Corpora scenario backlog** (2012-ngdc, 2019-narcos, 2019-owl, 2019-tuck) | disk / mobile / mixed | [digitalcorpora.org · scenarios](https://digitalcorpora.org/corpora/scenarios/) |
+| **Digital Corpora parser corpora** (Android/iOS, NPS disk images, SQLite Forensic Corpus) | mobile / disk / SQLite | [digitalcorpora.org · corpora](https://digitalcorpora.org/corpora/) |
+| **DFRWS challenge backlog** (Troubled Elevator, IoT, multisource challenges) | disk / memory / network / IoT | [dfrws.org · forensic challenges](https://dfrws.org/forensic-challenges/) |
+| **Public PCAP exercise indexes** | pcap → network triage | [Malware-Traffic-Analysis.net](https://www.malware-traffic-analysis.net/) · [Netresec PCAP files](https://www.netresec.com/?page=PcapFiles) |
 | **Memory samples** (Volatility-style) | memory → `vol_*` | [github.com/pinesol93/MemoryForensicSamples](https://github.com/pinesol93/MemoryForensicSamples) |
+| **Memory CTF / sample backlog** (Volatility samples, MemLabs 4-6) | memory → `vol_*` | [Volatility Memory Samples](https://github.com/volatilityfoundation/volatility/wiki/Memory-Samples) · [MemLabs](https://github.com/stuxnet999/MemLabs) |
 | **Curated image / CTF lists** | everything | [DFIR.Training test images](https://www.dfir.training/downloads/test-images) · [AboutDFIR Challenges & CTFs](https://aboutdfir.com/education/challenges-ctfs/) · ["Where to find DFIR images" — soji256](https://soji256.medium.com/where-can-you-find-images-that-you-can-use-to-learn-forensics-141c6c8cdc9e) · [awesome-forensics](https://github.com/cugu/awesome-forensics) |
 
 **SANS DFIR.** The [SANS SIFT Workstation](https://www.sans.org/tools/sift-workstation) — VERDICT's recommended disk-image parity path — is a free download from the [SANS DFIR community page](https://digital-forensics.sans.org/community/downloads). Note: the enterprise multi-host scenario in our own showcase (a domain controller + file server, the kind used in [SANS FOR508](https://www.sans.org/cyber-security-courses/advanced-incident-response-threat-hunting-training)-style labs) is course lab material and **is not publicly redistributable** — use the public datasets above to reproduce that class of investigation.
@@ -154,7 +159,7 @@ interpretation; that stays the examiner's call.
 
 ## See it run
 
-Every capture below is a real run, not a mockup. Full gallery: [`docs/showcase/`](docs/showcase/).
+Every capture below is from a real VERDICT run, not a mockup — except the fact-fidelity clip, which replays a recorded tool output to isolate the real decision logic (flagged at that clip). Full gallery: [`docs/showcase/`](docs/showcase/).
 
 <p align="center">
   <img src="docs/showcase/dashboard-live.gif" alt="VERDICT live dashboard streaming the hash-chained audit, tool-cited findings, and the signed verdict during a real run" width="760">
@@ -311,7 +316,7 @@ Details: [`docs/fact-fidelity.md`](docs/fact-fidelity.md).
 <p align="center">
   <img src="docs/showcase/fact-fidelity-demo.gif" alt="Fact-fidelity demo: an honest finding is approved while an injected misread is rejected before it reaches the verdict" width="760">
 </p>
-<p align="center"><sub>A <b>real run</b> — the compiled <code>findevil-mcp</code> re-runs the cited tool on real evidence: an honest finding is <b>approved</b>, an injected misread is <b>rejected</b> before it can reach the verdict. Full-resolution <a href="docs/showcase/fact-fidelity-demo.mp4">mp4</a>.</sub></p>
+<p align="center"><sub>A demo of the <b>real</b> verifier + fact-fidelity (entailment) code: an honest finding is <b>approved</b>, an injected misread is <b>rejected</b> before it can reach the verdict. The decision is production code; the cited tool's re-run is <b>replayed from its recorded output</b> (no live MCP or evidence in this clip). For the same check firing on <b>real evidence</b> in a committed, offline-verifiable run, see <a href="docs/release-evidence/sample-run/">docs/release-evidence/sample-run/</a> (<code>entailment_ok: true</code>). Full-resolution <a href="docs/showcase/fact-fidelity-demo.mp4">mp4</a>.</sub></p>
 
 ## Capabilities
 

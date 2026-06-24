@@ -88,6 +88,7 @@ def display_artifact_path(value: Any) -> str:
 
     return raw
 
+
 plt.rcParams.update(
     {
         "font.family": "DejaVu Sans",
@@ -1639,7 +1640,9 @@ def write_markdown(
             # appendix is not "2-class claim, 1 replay".
             replay_rows.append(
                 "| {finding} | `{tool}` | `{drift}` | {matched} | `{expected}` | `{actual}` |".format(
-                    finding=md_cell(str(f.get("finding_id", f"#{i}")) + " (corroboration)"),
+                    finding=md_cell(
+                        str(f.get("finding_id", f"#{i}")) + " (corroboration)"
+                    ),
                     tool=md_cell(corr.get("tool_name", "")),
                     drift=md_cell(corr.get("drift_class", "")),
                     matched="yes" if corr.get("matched") else "no",
@@ -2073,9 +2076,7 @@ def write_markdown(
     # Display-safe evidence label for the customer report header: keep only the
     # basename so an operator's absolute /home path never leaks into REPORT.md /
     # .html / .pdf. The full path is preserved in verdict.json for operational use.
-    evidence_display = (
-        Path(evidence).name if evidence and evidence != "?" else evidence
-    )
+    evidence_display = Path(evidence).name if evidence and evidence != "?" else evidence
 
     md.write_text(
         f"""[VERDICT · DFIR Case File]{{.kicker}}
