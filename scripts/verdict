@@ -58,6 +58,10 @@ export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
+# Contain all runtime state (case store, memory.sqlite, tmp, caches) inside the
+# project folder so a direct `scripts/verdict` run matches the MCP launchers.
+# shellcheck source=lib/project-env.sh
+source "${REPO_ROOT}/scripts/lib/project-env.sh"
 
 DASH="http://localhost:3000"
 EVIDENCE_DIR="${REPO_ROOT}/evidence"

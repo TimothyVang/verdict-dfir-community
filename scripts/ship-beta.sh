@@ -59,10 +59,15 @@ info "exporting a clean tree from $REF (honors .gitattributes export-ignore)..."
 git -C "$REPO" archive --worktree-attributes "$REF" | tar -x -C "$TREE"
 
 # ---- AUDIT the clean tree for private/risky leftovers ------------------------
+# .claude is private EXCEPT skills/ (the /verdict slash-skill) and settings.json
+# (the SHARED, reviewed agent-containment config — path-guard PreToolUse hooks
+# only, no secrets, no machine paths; ships so installers get the same rules).
+# settings.local.json stays private (it's export-ignored + gitignored).
 risky_paths="$(cd "$TREE" && find . -type f \( \
   -path './docs/internal/*' -o -path './obsidian-mind/*' -o \
-  \( -path './.claude/*' ! -path './.claude/skills/*' \) -o \
+  \( -path './.claude/*' ! -path './.claude/skills/*' ! -path './.claude/settings.json' \) -o \
   -path './docs/plans/*' -o -path './docs/specs/*' -o -path './docs/reports/*' -o \
+  -path './docs/superpowers/*' -o \
   -path './docs/legacy/*' -o -path './evidence/*' -o -path './tmp/*' -o \
   -name '.env' -o -name '.env.*' -o -name '.envrc' -o -name '*.pem' -o -name '*.key' -o \
   -name 'id_rsa*' -o -name '*.E01' -o -name '*.dd' -o -name '*.raw' -o -name '*.mem' -o \

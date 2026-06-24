@@ -21,7 +21,9 @@ and never required to contribute. Everything you need is `main` (to read) and `d
 
 1. **Fork** this repo and clone your fork.
 2. **Branch off `develop`:** `git switch develop && git switch -c fix/<short-topic>`.
-3. Make a **surgical** change (see the invariants in CONTRIBUTING).
+3. Make a **surgical** change (see the invariants in CONTRIBUTING). Keep files in their
+   place — the repo root is config + public docs only; everything else lives in a named
+   directory (see [repo-layout.md](repo-layout.md), enforced by `scripts/repo-layout-smoke.py`).
 4. **Run the gates locally** (next section). Open the PR only when they are green.
 5. **Open a pull request against `develop`** with a clear summary and a test plan.
 

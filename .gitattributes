@@ -12,7 +12,10 @@
 # /.claude/**, or git archive prunes the whole subtree before it sees a
 # -export-ignore re-include, dropping .claude/skills/ (the public /verdict skill).
 /.claude/commands/** export-ignore
-/.claude/settings*.json export-ignore
+# settings.local.json is operator-local (absolute paths, personal allows) — never
+# ship it. settings.json is the SHARED project containment (deny rules + path
+# hooks) and DOES ship so installers get the same rules. See docs/agent-containment.md.
+/.claude/settings.local.json export-ignore
 /.claude/workflows/** export-ignore
 /.claude/agents/** export-ignore
 /obsidian-mind/** export-ignore
@@ -23,6 +26,9 @@
 /docs/reports/** export-ignore
 /docs/internal/** export-ignore
 /docs/sample-run/** export-ignore
+# superpowers-skill plans/specs are operator design scratch (same class as
+# docs/plans + docs/specs) — keep them out of public exports.
+/docs/superpowers/** export-ignore
 # docs/commercial.md is a pre-publication DRAFT (open ethics/COI/ownership/license TODOs); keep it out of public exports.
 /docs/commercial.md export-ignore
 

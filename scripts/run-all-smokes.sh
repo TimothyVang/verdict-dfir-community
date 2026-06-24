@@ -133,6 +133,20 @@ run_smoke \
     "path-existence-smoke (every backtick-quoted path resolves to a real file/dir)" \
     "python3 scripts/path-existence-smoke.py"
 
+# 7b. Repo-layout audit — the repo root may only hold sanctioned config files,
+#     public docs, and known top-level dirs; a stray tracked-or-un-ignored entry
+#     (loose note, duplicate asset folder, scratch dir) fails this gate.
+run_smoke \
+    "repo-layout-smoke (no un-sanctioned tracked/un-ignored entries at repo root)" \
+    "python3 scripts/repo-layout-smoke.py"
+
+# 7c. Containment regression lock — every MCP launcher + scripts/verdict must keep
+#     sourcing scripts/lib/project-env.sh and .mcp.json must launch through the
+#     wrappers, so all runtime + toolchain state stays inside .project-local/.
+run_smoke \
+    "containment-smoke (runtime + toolchain stay in .project-local/)" \
+    "python3 scripts/containment-smoke.py"
+
 # 8b. Trace-finding tamper detection — verdict and manifest edits after finalize
 #     must break offline tracing.
 run_smoke \

@@ -126,10 +126,23 @@ pub fn is_allowed_parser(parser: &str) -> bool {
 }
 
 /// Build the `log2timeline.py` argv. Pure + unit-tested.
-fn build_l2t_args(parser: &str, storage_file: &Path, artifact: &Path) -> Vec<OsString> {
+///
+/// `log_file` pins plaso's run-log to an explicit path. Without `--logfile`,
+/// plaso drops a timestamped `log2timeline-<ts>.log.gz` into the process CWD
+/// (the repo root for the MCP server) on every invocation — junk that
+/// accumulated 195+ files at the root. Routing it to a temp path that the
+/// caller cleans up keeps the working tree clean.
+fn build_l2t_args(
+    parser: &str,
+    storage_file: &Path,
+    artifact: &Path,
+    log_file: &Path,
+) -> Vec<OsString> {
     vec![
         "--status-view".into(),
         "none".into(),
+        "--logfile".into(),
+        log_file.as_os_str().to_os_string(),
         "--parsers".into(),
         parser.into(),
         "--storage-file".into(),
@@ -139,10 +152,15 @@ fn build_l2t_args(parser: &str, storage_file: &Path, artifact: &Path) -> Vec<OsS
 }
 
 /// Build the `psort.py` argv (JSON-line export). Pure + unit-tested.
-fn build_psort_args(storage_file: &Path, out_file: &Path) -> Vec<OsString> {
+///
+/// `log_file` pins psort's run-log to an explicit path for the same reason as
+/// [`build_l2t_args`]: psort otherwise writes a `psort-<ts>.log.gz` into the CWD.
+fn build_psort_args(storage_file: &Path, out_file: &Path, log_file: &Path) -> Vec<OsString> {
     vec![
         "--status-view".into(),
         "none".into(),
+        "--logfile".into(),
+        log_file.as_os_str().to_os_string(),
         "-o".into(),
         "json_line".into(),
         "-w".into(),
@@ -181,25 +199,34 @@ pub fn plaso_parse(input: &PlasoParseInput) -> Result<PlasoParseOutput, PlasoPar
     let tag = format!("{}-{}", std::process::id(), nanosecond_tag());
     let storage = std::env::temp_dir().join(format!("plaso-{}-{tag}.plaso", input.parser));
     let out_file = std::env::temp_dir().join(format!("plaso-{}-{tag}.jsonl", input.parser));
+    // Pin plaso's per-stage run-logs to temp instead of the process CWD (the repo
+    // root), then clean them up — otherwise each parse litters the working tree
+    // with log2timeline-<ts>.log.gz / psort-<ts>.log.gz.
+    let l2t_log = std::env::temp_dir().join(format!("plaso-{}-{tag}.l2t.log.gz", input.parser));
+    let psort_log = std::env::temp_dir().join(format!("plaso-{}-{tag}.psort.log.gz", input.parser));
 
     let l2t_stderr = run_stage(
         &l2t,
-        &build_l2t_args(&input.parser, &storage, &input.artifact_path),
+        &build_l2t_args(&input.parser, &storage, &input.artifact_path, &l2t_log),
         "log2timeline.py",
     );
     let l2t_stderr = match l2t_stderr {
         Ok(s) => s,
         Err(e) => {
-            cleanup(&[&storage, &out_file]);
+            cleanup(&[&storage, &out_file, &l2t_log, &psort_log]);
             return Err(e);
         }
     };
 
-    let psort_stderr = run_stage(&psort, &build_psort_args(&storage, &out_file), "psort.py");
+    let psort_stderr = run_stage(
+        &psort,
+        &build_psort_args(&storage, &out_file, &psort_log),
+        "psort.py",
+    );
     let psort_stderr = match psort_stderr {
         Ok(s) => s,
         Err(e) => {
-            cleanup(&[&storage, &out_file]);
+            cleanup(&[&storage, &out_file, &l2t_log, &psort_log]);
             return Err(e);
         }
     };
@@ -215,7 +242,7 @@ pub fn plaso_parse(input: &PlasoParseInput) -> Result<PlasoParseOutput, PlasoPar
         canonicalize_event_paths(&mut out.events, &input.artifact_path);
         out
     });
-    cleanup(&[&storage, &out_file]);
+    cleanup(&[&storage, &out_file, &l2t_log, &psort_log]);
     result
 }
 
@@ -679,6 +706,7 @@ mod tests {
             "syslog",
             Path::new("/t/s.plaso"),
             Path::new("/var/log/syslog"),
+            Path::new("/t/l2t.log.gz"),
         );
         let s = as_strings(&args);
         assert_eq!(
@@ -686,6 +714,8 @@ mod tests {
             vec![
                 "--status-view",
                 "none",
+                "--logfile",
+                "/t/l2t.log.gz",
                 "--parsers",
                 "syslog",
                 "--storage-file",
@@ -697,11 +727,18 @@ mod tests {
 
     #[test]
     fn build_psort_args_exports_json_line() {
-        let args = build_psort_args(Path::new("/t/s.plaso"), Path::new("/t/o.jsonl"));
+        let args = build_psort_args(
+            Path::new("/t/s.plaso"),
+            Path::new("/t/o.jsonl"),
+            Path::new("/t/psort.log.gz"),
+        );
         let s = as_strings(&args);
         assert!(s.contains(&"json_line".to_string()), "{s:?}");
         let w = s.iter().position(|a| a == "-w").unwrap();
         assert_eq!(s[w + 1], "/t/o.jsonl");
+        // run-log is pinned to an explicit path (not the CWD).
+        let lf = s.iter().position(|a| a == "--logfile").unwrap();
+        assert_eq!(s[lf + 1], "/t/psort.log.gz");
         // storage file is the trailing positional.
         assert_eq!(s.last().unwrap(), "/t/s.plaso");
     }
